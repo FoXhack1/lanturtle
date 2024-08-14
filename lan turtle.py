@@ -1,6 +1,5 @@
 import os
 import socket
-import threading
 import time
 import platform
 import clear
@@ -45,24 +44,24 @@ def main():
 
         if choice == "1":
             clear.clear()
-            threading.Thread(target=dns_spoofing_attack).start()
+            dns_spoofing_attack()
             print("DNS Spoofing Attack started!")
             input("Press Enter to continue...")
         elif choice == "2":
             clear.clear()
-            threading.Thread(target=arp_poisoning_attack).start()
+            arp_poisoning_attack()
             print("ARP Poisoning Attack started!")
             input("Press Enter to continue...")
         elif choice == "3":
             clear.clear()
-            threading.Thread(target=dhcp_starvation_attack).start()
+            dhcp_starvation_attack()
             print("DHCP Starvation Attack started!")
             input("Press Enter to continue...")
         elif choice == "4":
             clear.clear()
             target_ip = input("Enter the target IP address: ")
             target_port = int(input("Enter the target port: "))
-            threading.Thread(target=tcp_syn_flood_attack, args=(target_ip, target_port)).start()
+            tcp_syn_flood_attack(target_ip, target_port)
             print("TCP SYN Flood Attack started!")
             input("Press Enter to continue...")
         elif choice == "5":
