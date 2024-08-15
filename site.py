@@ -7,8 +7,11 @@ import subprocess
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Définition du port et de l'hôte pour le serveur web
+HOST = '192.168.1.128'  # or HOST = '<your_public_ip_address>'
 PORT = 8000
-HOST = 'localhost'
+
+# ...
+
 
 # Définition du template HTML pour le formulaire
 # ...
@@ -169,7 +172,8 @@ class WebServer(http.server.SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    server_address = ('', 8000)
+    server_address = (HOST, PORT)
     httpd = http.server.HTTPServer(server_address, WebServer)
-    print("Serveur web :http://localhost:8000")
+    print(f"Serveur web : http://{HOST}:{PORT}")
     httpd.serve_forever()
+
